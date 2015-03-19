@@ -1,0 +1,76 @@
+<html>
+<head>
+</head>
+<body>
+
+<video width="320" height="240" id="video" controls>
+  Your browser does not support the video tag.
+</video>
+
+
+<script type="text/javascript">
+
+var mediaSource = new (window.MediaSource || window.WebKitMediaSource)();
+window.video = document.getElementById('video');
+window.video.addEventListener("error", function onError(err) {
+    alert("window.video error detected:");
+    console.dir(window.video.error);
+    // window.video.terminate();
+}); 
+window.video.pause();
+window.video.src = URL.createObjectURL(mediaSource);
+var onMediaSourceOpen = function (e) {
+    mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
+    window.videoSource = mediaSource.addSourceBuffer('video/webm;codecs="vorbis,vp8"');
+    console.log("Calling Inject here!");
+    injectVideoIntoBuffer();
+}   
+
+mediaSource.addEventListener('sourceopen', onMediaSourceOpen);
+
+var injectVideoIntoBuffer = function onResponse() {
+    console.log("Inside inject buffer");
+    var start_index=0;
+    var end_index = 8962003;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "/video.webm");
+    xhr.responseType = 'arraybuffer';
+    // console.log()
+    xhr.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+    console.log("bytes="+start_index+"-"+end_index);
+    xhr.addEventListener("readystatechange", function () {
+        if (xhr.readyState == xhr.DONE) {
+            window["done"] = true;
+            console.log("HERE ! ");
+            var response = new Uint8Array(xhr.response)
+            console.log(response.length);
+            // console.log(response);
+         // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
+        videoSource.appendBuffer(response);
+        }
+    }, false);
+    xhr.send();
+
+
+    var start_index= 8962003;
+    var end_index = 17878941;
+    var xhr2 = new XMLHttpRequest();
+    xhr2.open('GET', "/video.webm");
+    xhr2.responseType = 'arraybuffer';
+    // console.log()
+    xhr2.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+    xhr2.addEventListener("readystatechange", function () {
+        if (xhr2.readyState == xhr2.DONE) {
+            window["response2"] = new Uint8Array(xhr2.response)
+            console.log(response2.length);
+            // console.log(response);
+         // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
+        // videoSource.appendBuffer(response);
+        }
+    }, false);
+    xhr2.send();
+}
+</script>
+
+</body>
+</html>

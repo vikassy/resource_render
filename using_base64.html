@@ -1,0 +1,188 @@
+<html>
+<head>
+</head>
+<body>
+
+<img id="ItemPreview" src="" />
+
+<script>
+
+function Length(url)
+{
+  var http = new XMLHttpRequest();
+  http.open('HEAD', url);
+  http.onreadystatechange = function() {
+    if (this.readyState == this.DONE) {
+      console.log(this);
+      length = this.getResponseHeader('Content-Length');
+      // console.log(this);
+      get_image(this.responseURL, length)
+    }
+  };
+  http.send();
+}
+
+// var length = 0;
+length = Length("binary");
+// console.log(length);
+// get_image("output", length);
+// console.log("Length = "+length);
+
+
+window["content1"] = ""
+window["content2"] = ""
+window["content3"] = ""
+
+function get_part(url, start_index, end_index, variable_name){
+  var xmlhttp=new XMLHttpRequest();
+  xmlhttp.open("GET",url,true);
+  // console.log("LENGTTH ="+length);
+  console.log("Start_part ="+start_index);
+  console.log("end_part ="+end_index);
+  // xmlhttp.responseType = 'arraybuffer';
+  xmlhttp.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+  xmlhttp.send();
+
+  xmlhttp.addEventListener("readystatechange", function () {
+    if (xmlhttp.readyState == xmlhttp.DONE) {
+      var response = xmlhttp.response;
+      // var response = new Uint8Array(xmlhttp.response)
+      // console.log(xmlhttp.response.length);
+      console.log("LENGTH of "+variable_name+" =  "+response.length);
+      // console.log(variable_name)
+      window[variable_name] = response;
+      if (window['content1'] != "" && window['content2'] != "" && window['content3'] != ""){
+        // content = content1+content2+content3
+        // content = _appendBuffer(window['content1'], window['content2']);
+        // content = _appendBuffer(window['content'], window['content3']);
+        // var b64encoded1 = btoa(String.fromCharCode.apply(null, content1));
+        // var b64encoded2 = btoa(String.fromCharCode.apply(null, content2));
+        // var b64encoded3 = btoa(String.fromCharCode.apply(null, content3));
+
+
+        // document.getElementById("ItemPreview").src = "data:image/png;base64," + b64encoded1 + b64encoded2 + b64encoded3;
+        document.getElementById("ItemPreview").src = "data:image/png;base64," + content1 + content2 + content3;
+      }
+    }
+  });
+
+  // var something = new ArrayBuffer(xmlhttp.response)
+// var view   = new Int32Array(buffer);
+  // return new Uint8Array(xmlhttp.response)
+}
+
+var _appendBuffer = function(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp;
+};
+
+function get_image(url, length){
+  var start_part_1 = 0;
+  var end_part_1 = Math.floor(length/3) - 2;
+  // if (end_part_1%3 != 0){
+  //   end_part_1 = end_part_1 + (3 - end_part_1%3);
+  // }
+
+  get_part(url, start_part_1, end_part_1, "content1");
+  console.log(content1);
+
+  var start_part_2 = end_part_1+1;
+  var end_part_2 = start_part_2 + end_part_1;
+
+
+  // var content2 = new Uint8Array(request.response);
+  get_part(url, start_part_2, end_part_2, "content2") //--> returns only the partial content
+
+  var start_part_3 = end_part_2+1;
+  var end_part_3 = length-1;
+
+  get_part(url, start_part_3, end_part_3, "content3") //--> returns only the partial content
+
+
+  // var start_part_4 = end_part_3;
+  // var end_part_4 = start_part_4 + end_part_1;
+
+  // console.log("Start_part 2 ="+start_part_4);
+  // console.log("end_part2 ="+end_part_4);
+
+  // // var content3 = new Uint8Array(request.response);
+  // content4 = xmlhttp.response; //--> returns only the partial content
+
+
+  // var start_part_5 = end_part_4;
+  // var end_part_5 = length -1;
+
+  // console.log("Start_part 2 ="+start_part_5);
+  // console.log("end_part2 ="+end_part_5);
+
+  // // var content3 = new Uint8Array(request.response);
+  // content5 = xmlhttp.response; //--> returns only the partial content
+
+
+  // image_64 = window.btoa(unescape(encodeURIComponent(content1 + content2 + content3)));
+  // console.log(image_64);
+  // content = content1+content2+content3
+  // image_64 = content
+  // console.log(content.length);
+  // image_64 = base64ArrayBuffer(content);
+
+  // document.getElementById("ItemPreview").src = "data:image/png;base64," + image_64;
+}
+
+function base64ArrayBuffer(arrayBuffer) {
+  var base64    = ''
+  var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+ 
+  var bytes         = new Uint8Array(arrayBuffer)
+  var byteLength    = bytes.byteLength
+  var byteRemainder = byteLength % 3
+  var mainLength    = byteLength - byteRemainder
+ 
+  var a, b, c, d
+  var chunk
+ 
+  // Main loop deals with bytes in chunks of 3
+  for (var i = 0; i < mainLength; i = i + 3) {
+    // Combine the three bytes into a single integer
+    chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+ 
+    // Use bitmasks to extract 6-bit segments from the triplet
+    a = (chunk & 16515072) >> 18 // 16515072 = (2^6 - 1) << 18
+    b = (chunk & 258048)   >> 12 // 258048   = (2^6 - 1) << 12
+    c = (chunk & 4032)     >>  6 // 4032     = (2^6 - 1) << 6
+    d = chunk & 63               // 63       = 2^6 - 1
+ 
+    // Convert the raw binary segments to the appropriate ASCII encoding
+    base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+  }
+ 
+  // Deal with the remaining bytes and padding
+  if (byteRemainder == 1) {
+    chunk = bytes[mainLength]
+ 
+    a = (chunk & 252) >> 2 // 252 = (2^6 - 1) << 2
+ 
+    // Set the 4 least significant bits to zero
+    b = (chunk & 3)   << 4 // 3   = 2^2 - 1
+ 
+    base64 += encodings[a] + encodings[b] + '=='
+  } else if (byteRemainder == 2) {
+    chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
+ 
+    a = (chunk & 64512) >> 10 // 64512 = (2^6 - 1) << 10
+    b = (chunk & 1008)  >>  4 // 1008  = (2^6 - 1) << 4
+ 
+    // Set the 2 least significant bits to zero
+    c = (chunk & 15)    <<  2 // 15    = 2^4 - 1
+ 
+    base64 += encodings[a] + encodings[b] + encodings[c] + '='
+  }
+  
+  return base64
+}
+
+</script>
+</body>
+</html>

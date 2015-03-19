@@ -1,0 +1,172 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+
+window["b64content1"] = ""
+window["b64content2"] = ""
+window["b64content3"] = ""
+
+window["content1"] = ""
+window["content2"] = ""
+window["content3"] = ""
+length = Length("sample2.jpg");
+
+function Length(url)
+{
+  var http = new XMLHttpRequest();
+  http.open('HEAD', url);
+  http.onreadystatechange = function() {
+    if (this.readyState == this.DONE) {
+      console.log(this);
+      length = this.getResponseHeader('Content-Length');
+      // console.log(this);
+      get_image(this.responseURL, length)
+      // console.log(http);
+      // console.log(length);
+      // end = (length/2).toFixed();
+      // content1 = get_part(url, 0, end);
+      // content2 = get_part(url, (end*1)+1, length-1);
+      // image_64 = content1 + content2;
+      // document.getElementById("ItemPreview").src = "data:image/png;base64," + image_64;
+      // get_image(url, );
+      // return l;
+    }
+  };
+  http.send();
+}
+
+// var length = 0;
+// console.log(length);
+// get_image("output", length);
+// console.log("Length = "+length);
+
+function get_part(url, start_index, end_index, variable_name){
+  var xmlhttp=new XMLHttpRequest();
+  xmlhttp.open("GET",url,true);
+  // console.log("LENGTTH ="+length);
+  console.log("Start_part ="+start_index);
+  console.log("end_part ="+end_index);
+  xmlhttp.responseType = 'arraybuffer';
+  xmlhttp.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+  xmlhttp.send();
+
+  xmlhttp.addEventListener("readystatechange", function () {
+    if (xmlhttp.readyState == xmlhttp.DONE) {
+      var response = new Uint8Array(xmlhttp.response)
+      // console.log(xmlhttp.response.length);
+      console.log("LENGTH of "+variable_name+" =  "+response.length);
+      // console.log(variable_name)
+
+      window[variable_name] = response;
+      window["b64"+variable_name] = btoa(get_string(window[variable_name]));
+      
+
+      if (window['b64content1'] != "" && window['b64content2'] != "" && window['b64content3'] != ""){
+        // content = content1+content2+content3
+        // content = _appendBuffer(window['content1'], window['content2']);
+        // content = _appendBuffer(window['content'], window['content3']);
+        // get_string(content1);
+        // var b64encoded1 = btoa(String.fromCharCode.apply(null, content1));
+        // var b64encoded1 = btoa(get_string(content1));
+        // var b64encoded2 = btoa(get_string(content2));
+        // var b64encoded3 = btoa(get_string(content3));
+        // var b64encoded2 = btoa(String.fromCharCode.apply(null, content2));
+        // var b64encoded3 = btoa(String.fromCharCode.apply(null, content3));
+
+
+        document.getElementById("ItemPreview").src = "data:image/png;base64," + b64content1 + b64content2 + b64content3;
+      }
+    }
+  });
+
+  // var something = new ArrayBuffer(xmlhttp.response)
+// var view   = new Int32Array(buffer);
+  // return new Uint8Array(xmlhttp.response)
+}
+
+function get_string(content)
+{
+  var length = content.length
+  var string = ""
+  for(var i=0;i< length;i++)
+  {
+    string += String.fromCharCode(content[i]);
+  }
+  return string
+}
+
+var _appendBuffer = function(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp;
+};
+
+function get_image(url, length){
+  var start_part_1 = 0;
+  var end_part_1 = Math.floor(length/3);
+
+  if (end_part_1 % 3 != 0 ){
+    end_part_1 += 3 - (end_part_1 % 3);
+  }
+
+  end_part_1 = end_part_1-1;
+
+  get_part(url, start_part_1, end_part_1, "content1");
+  console.log(content1);
+
+  var start_part_2 = end_part_1+1;
+  var end_part_2 = start_part_2 + end_part_1;
+
+
+  // var content2 = new Uint8Array(request.response);
+  get_part(url, start_part_2, end_part_2, "content2") //--> returns only the partial content
+
+  var start_part_3 = end_part_2+1;
+  var end_part_3 = length-1;
+
+  get_part(url, start_part_3, end_part_3, "content3") //--> returns only the partial content
+
+
+  // var start_part_4 = end_part_3;
+  // var end_part_4 = start_part_4 + end_part_1;
+
+  // console.log("Start_part 2 ="+start_part_4);
+  // console.log("end_part2 ="+end_part_4);
+
+  // // var content3 = new Uint8Array(request.response);
+  // content4 = xmlhttp.response; //--> returns only the partial content
+
+
+  // var start_part_5 = end_part_4;
+  // var end_part_5 = length -1;
+
+  // console.log("Start_part 2 ="+start_part_5);
+  // console.log("end_part2 ="+end_part_5);
+
+  // // var content3 = new Uint8Array(request.response);
+  // content5 = xmlhttp.response; //--> returns only the partial content
+
+
+  // image_64 = window.btoa(unescape(encodeURIComponent(content1 + content2 + content3)));
+  // console.log(image_64);
+  // content = content1+content2+content3
+  // image_64 = content
+  // console.log(content.length);
+  // image_64 = base64ArrayBuffer(content);
+
+  // document.getElementById("ItemPreview").src = "data:image/png;base64," + image_64;
+}
+
+
+</script>
+
+
+
+<img id="ItemPreview" src="" />
+
+</body>
+</html>
+<!--  -->
