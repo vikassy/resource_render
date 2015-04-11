@@ -4,17 +4,25 @@
 <body>
 <script>
 
-window["b64content1"] = ""
-window["b64content2"] = ""
-window["b64content3"] = ""
-
-window["content1"] = ""
-window["content2"] = ""
-window["content3"] = ""
 var image = window.location.hash.split('#')[1];
-length = Length(image);
+var CONNECTIONS = 3;
 
-function Length(url)
+for (var i = 1; i <= CONNECTIONS; i++) {
+  window["b64content"+i] = "";
+  window["content"+i] = "";
+};
+
+// window["b64content1"] = ""
+// window["b64content2"] = ""
+// window["b64content3"] = ""
+
+// window["content1"] = ""
+// window["content2"] = ""
+// window["content3"] = ""
+
+length = Length(image, CONNECTIONS);
+
+function Length(url, connections)
 {
   var http = new XMLHttpRequest();
   http.open('HEAD', url);
@@ -23,27 +31,13 @@ function Length(url)
       console.log(this);
       length = this.getResponseHeader('Content-Length');
       // console.log(this);
-      get_image(url, length)
-      // console.log(http);
-      // console.log(length);
-      // end = (length/2).toFixed();
-      // content1 = get_part(url, 0, end);
-      // content2 = get_part(url, (end*1)+1, length-1);
-      // image_64 = content1 + content2;
-      // document.getElementById("ItemPreview").src = "data:image/png;base64," + image_64;
-      // get_image(url, );
-      // return l;
+      get_image(url, length, connections)
     }
   };
   http.send();
 }
 
-// var length = 0;
-// console.log(length);
-// get_image("output", length);
-// console.log("Length = "+length);
-
-function get_part(url, start_index, end_index, variable_name){
+function get_part(url, start_index, end_index, variable_name, connections){
   var xmlhttp=new XMLHttpRequest();
   xmlhttp.open("GET",url,true);
   // console.log("LENGTTH ="+length);
@@ -64,21 +58,19 @@ function get_part(url, start_index, end_index, variable_name){
       window["b64"+variable_name] = btoa(get_string(window[variable_name]));
       
 
-      if (window['b64content1'] != "" && window['b64content2'] != "" && window['b64content3'] != ""){
-        // content = content1+content2+content3
-        // content = _appendBuffer(window['content1'], window['content2']);
-        // content = _appendBuffer(window['content'], window['content3']);
-        // get_string(content1);
-        // var b64encoded1 = btoa(String.fromCharCode.apply(null, content1));
-        // var b64encoded1 = btoa(get_string(content1));
-        // var b64encoded2 = btoa(get_string(content2));
-        // var b64encoded3 = btoa(get_string(content3));
-        // var b64encoded2 = btoa(String.fromCharCode.apply(null, content2));
-        // var b64encoded3 = btoa(String.fromCharCode.apply(null, content3));
+      // if (window['b64content1'] != "" && window['b64content2'] != "" && window['b64content3'] != ""){
 
+      for (var i = 1; i <= connections; i++) {
+        if (window['b64content'+i] == "")
+          return;
+      };
 
-        document.getElementById("ItemPreview").src = "data:image/png;base64," + b64content1 + b64content2 + b64content3;
-      }
+      var final_content = ""
+
+      for (var i = 1; i <= connections; i++) {
+        final_content += window['b64content'+i];
+      };
+      document.getElementById("ItemPreview").src = "data:image/png;base64," + final_content;
     }
   });
 
@@ -105,30 +97,49 @@ var _appendBuffer = function(buffer1, buffer2) {
   return tmp;
 };
 
-function get_image(url, length){
-  var start_part_1 = 0;
-  var end_part_1 = Math.floor(length/3);
+function get_image(url, length, connections){
 
-  if (end_part_1 % 3 != 0 ){
-    end_part_1 += 3 - (end_part_1 % 3);
-  }
+  var difference = Math.floor(length/connections);
+  var modulo = difference%3;
+  if (modulo == 0)
+    difference -= 1;
+  else if (modulo%3 == 1)
+    difference -= 2;
 
-  end_part_1 = end_part_1-1;
+  var start_point = 0;
+  var i = 0;
 
-  get_part(url, start_part_1, end_part_1, "content1");
-  console.log(content1);
+  for (i = 1; i <= (length/difference)-1; start_point = end_point +1, i++) {
+    end_point = start_point + difference;
+    get_part(url, start_point, end_point, "content"+i, connections);
+  };
 
-  var start_part_2 = end_part_1+1;
-  var end_part_2 = start_part_2 + end_part_1;
+  get_part(url, start_point, length-1, "content"+i, connections);
+
+  // var end_part_1 = Math.floor(length/3);
+
+  // while()
+
+  // if (end_part_1 % 3 != 0 ){
+  //   end_part_1 += 3 - (end_part_1 % 3);
+  // }
+
+  // end_part_1 = end_part_1-1;
+
+  // get_part(url, start_part_1, end_part_1, "content1");
+  // console.log(content1);
+
+  // var start_part_2 = end_part_1+1;
+  // var end_part_2 = start_part_2 + end_part_1;
 
 
-  // var content2 = new Uint8Array(request.response);
-  get_part(url, start_part_2, end_part_2, "content2") //--> returns only the partial content
+  // // var content2 = new Uint8Array(request.response);
+  // get_part(url, start_part_2, end_part_2, "content2") //--> returns only the partial content
 
-  var start_part_3 = end_part_2+1;
-  var end_part_3 = length-1;
+  // var start_part_3 = end_part_2+1;
+  // var end_part_3 = length-1;
 
-  get_part(url, start_part_3, end_part_3, "content3") //--> returns only the partial content
+  // get_part(url, start_part_3, end_part_3, "content3") //--> returns only the partial content
 
 
   // var start_part_4 = end_part_3;
