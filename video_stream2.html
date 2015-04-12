@@ -1,78 +1,33 @@
+<!DOCTYPE html>
 <html>
 <head>
+<title>Preload video via AJAX</title>
 </head>
 <body>
+<script>
+console.log("Downloading video...hellip;Please wait...")
+var url = window.location.hash.split("#")[1];
+var xhr = new XMLHttpRequest();
+xhr.open('GET', url, true);
+xhr.responseType = 'blob';
+xhr.onload = function(e) {
+  if (this.status == 200) {
+    console.log("got it");
+    var myBlob = this.response;
+    var vid = (window.webkitURL ? webkitURL : URL).createObjectURL(myBlob);
+    // myBlob is now the blob that the object URL pointed to.
+    var video = document.getElementById("video");
+    console.log("Loading video into element");
+    video.src = vid;
+    // not needed if autoplay is set for the video element
+    // video.play()
+   }
+  }
 
-<video width="320" height="240" id="video" controls>
-<source src="video.webm" type="video/webm">
-  Your browser does not support the video tag.
-</video>
-
-
-<script type="text/javascript">
-// var mediaSource = new (window.MediaSource || window.WebKitMediaSource)();
-// window.video = document.getElementById('video');
-// window.video.addEventListener("error", function onError(err) {
-//     alert("window.video error detected:");
-//     console.dir(window.video.error); window.worker.terminate();
-// }); 
-// window.video.pause();
-// window.video.src = URL.createObjectURL(mediaSource);
-// var onMediaSourceOpen = function (e) {
-//     mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
-//     window.videoSource = mediaSource.addSourceBuffer('video/webm;codecs="vorbis,vp8"');
-//     console.log("Calling Inject here!");
-//     injectVideoIntoBuffer();
-// }   
-
-// mediaSource.addEventListener('sourceopen', onMediaSourceOpen);
-
-// var injectVideoIntoBuffer = function onResponse() {
-//     console.log("Inside inject buffer");
-//     var start_index=0;
-//     var end_index = 8962003;
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('GET', "binary");
-//     xhr.responseType = 'arraybuffer';
-//     // console.log()
-//     xhr.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
-//     xhr.addEventListener("readystatechange", function () {
-//         if (xhr.readyState == xhr.DONE) {
-//             window["done"] = true;
-//             console.log("HERE ! ");
-//             var response = new Uint8Array(xhr.response)
-//             console.log(response.length);
-//             // console.log(response);
-//          // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
-//         videoSource.appendBuffer(response);
-//         }
-//     }, false);
-//     xhr.send();
-
-
-//     var start_index=8962004;
-//     var end_index = 17924007;
-//     var xhr2 = new XMLHttpRequest();
-//     xhr2.open('GET', "binary");
-//     xhr2.responseType = 'arraybuffer';
-//     // console.log()
-//     xhr2.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
-//     xhr2.addEventListener("readystatechange", function () {
-//         if (xhr2.readyState == xhr2.DONE) {
-//             // while(window["done"] != true) {
-                
-//             // }
-//             console.log("HERE ! ");
-//             window["response3"] = new Uint8Array(xhr2.response)
-//             // console.log(response3.length);
-//             // console.log(response);
-//          // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
-//         videoSource.appendBuffer(response);
-//         }
-//     }, false);
-//     xhr2.send();
-// }
+xhr.send();
 </script>
+
+<video id="video" controls autoplay></video>
 
 </body>
 </html>

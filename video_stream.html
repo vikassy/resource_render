@@ -10,6 +10,60 @@
 
 <script type="text/javascript">
 
+window["count"] = 0;
+window["video_hash"] = {};
+window["CONNECTIONS"] = 6;
+
+function Length(url, connections)
+{
+  var http = new XMLHttpRequest();
+  http.open('HEAD', url);
+  http.onreadystatechange = function() {
+    if (this.readyState == this.DONE) {
+      console.log(this);
+      length = this.getResponseHeader('Content-Length');
+      // console.log(this);
+      get_video(url, length, connections)
+    }
+  };
+  http.send();
+}
+
+function get_video (url, length, connections) {
+
+    var difference = Math.floor(length/connections);
+    var start_point = 0;
+
+    for (i = 1; i <= connections-1; start_point = end_point+1, i++) {
+        end_point = start_point + difference;
+        get_part(url, start_point, end_point, i, connections);
+    };
+
+    get_part(url, start_point, length-1, i, connections);
+}
+
+function get_part(url, start_index, end_index, id, connections){
+  var xmlhttp=new XMLHttpRequest();
+  xmlhttp.open("GET",url,true);
+  // console.log("LENGTTH ="+length);
+  console.log("Start_part ="+start_index);
+  console.log("end_part ="+end_index);
+  xmlhttp.responseType = 'arraybuffer';
+  xmlhttp.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+  xmlhttp.addEventListener("readystatechange", function () {
+        if (xmlhttp.readyState == xmlhttp.DONE) {
+            var response = new Uint8Array(xmlhttp.response)
+            window["video_hash"][id] = response;
+            if (id == 1)
+            {
+                videoSource.appendBuffer(response);
+                window["count"] = 2;
+            }
+        }
+    }, false);
+    xmlhttp.send();
+}
+
 var mediaSource = new (window.MediaSource || window.WebKitMediaSource)();
 window.video = document.getElementById('video');
 window.video.addEventListener("error", function onError(err) {
@@ -19,56 +73,45 @@ window.video.addEventListener("error", function onError(err) {
 }); 
 window.video.pause();
 window.video.src = URL.createObjectURL(mediaSource);
+
 var onMediaSourceOpen = function (e) {
     mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
     window.videoSource = mediaSource.addSourceBuffer('video/webm;codecs="vorbis,vp8"');
-    console.log("Calling Inject here!");
+        videoSource.addEventListener('updateend', function() {
+            if ((window["video_hash"])[(window["count"])] != undefined) {
+                videoSource.appendBuffer(window["video_hash"][window["count"]]);
+                window["count"] += 1;
+            }
+        }, false);
     injectVideoIntoBuffer();
-}   
+}
 
 mediaSource.addEventListener('sourceopen', onMediaSourceOpen);
 
 var injectVideoIntoBuffer = function onResponse() {
-    console.log("Inside inject buffer");
-    var start_index=0;
-    var end_index = 8962003;
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', "/video.webm");
-    xhr.responseType = 'arraybuffer';
-    // console.log()
-    xhr.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
-    console.log("bytes="+start_index+"-"+end_index);
-    xhr.addEventListener("readystatechange", function () {
-        if (xhr.readyState == xhr.DONE) {
-            window["done"] = true;
-            console.log("HERE ! ");
-            var response = new Uint8Array(xhr.response)
-            console.log(response.length);
-            // console.log(response);
-         // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
-        videoSource.appendBuffer(response);
-        }
-    }, false);
-    xhr.send();
+    var url = window.location.hash.split("#")[1];
+    Length(url, window["CONNECTIONS"]);
+}
 
+function check_timeout(something){
+    videoSource.appendBuffer(window["response2"]);
+    console.log("GOT CALLED");
+    if (window["count"] == 3)
+    {
+        window["count"] = 0;
+        // clearTimeout(window["timer"]);
+        console.log("HEREEE ! adding buffer");
+        videoSource.appendBuffer(window["response2"]);
+    }
+    else{
+        console.log("here in count = "+ window["count"]);
+        window["count"] += 1;
+    }
+}
 
-    var start_index= 8962003;
-    var end_index = 17878941;
-    var xhr2 = new XMLHttpRequest();
-    xhr2.open('GET', "/video.webm");
-    xhr2.responseType = 'arraybuffer';
-    // console.log()
-    xhr2.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
-    xhr2.addEventListener("readystatechange", function () {
-        if (xhr2.readyState == xhr2.DONE) {
-            window["response2"] = new Uint8Array(xhr2.response)
-            console.log(response2.length);
-            // console.log(response);
-         // Next line raises a MediaError, code: 4, (MEDIA_ERR_SRC_NOT_SUPPORTED)         
-        // videoSource.appendBuffer(response);
-        }
-    }, false);
-    xhr2.send();
+function sleep(el) { 
+    window["timer"] = setTimeout(check_timeout(el), 1000); 
+
 }
 </script>
 
