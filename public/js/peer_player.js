@@ -1,18 +1,7 @@
-<html>
-<head>
-</head>
-<body>
-
-<video width="320" height="240" id="video" controls>
-  Your browser does not support the video tag.
-</video>
-
-
-<script type="text/javascript">
-
 window["count"] = 0;
 window["video_hash"] = {};
 window["CONNECTIONS"] = 6;
+window["processing_video"] = false;
 
 function Length(url, connections)
 {
@@ -30,34 +19,43 @@ function Length(url, connections)
 }
 
 function get_video (url, length, connections) {
+  var difference = Math.floor(length/connections);
+  var start_point = 0;
 
-    var difference = Math.floor(length/connections);
-    var start_point = 0;
-
-    for (i = 1; i <= connections-1; start_point = end_point+1, i++) {
-        end_point = start_point + difference;
-        get_part(url, start_point, end_point, i, connections);
-    };
-
-    get_part(url, start_point, length-1, i, connections);
+  for (i = 1; i <= connections-1; start_point = end_point+1, i++) {
+      end_point = start_point + difference;
+      get_part(url, start_point, end_point, i, connections);
+  };
+  get_part(url, start_point, length-1, i, connections);
 }
 
 function get_part(url, start_index, end_index, id, connections){
-  var xmlhttp=new XMLHttpRequest();
+  var xmlhttp = new XMLHttpRequest();
   xmlhttp.open("GET",url,true);
   // console.log("LENGTTH ="+length);
   console.log("Start_part ="+start_index);
   console.log("end_part ="+end_index);
   xmlhttp.responseType = 'arraybuffer';
   xmlhttp.setRequestHeader("Range", "bytes="+start_index+"-"+end_index);
+
   xmlhttp.addEventListener("readystatechange", function () {
         if (xmlhttp.readyState == xmlhttp.DONE) {
             var response = new Uint8Array(xmlhttp.response)
             window["video_hash"][id] = response;
             if (id == 1)
             {
-                videoSource.appendBuffer(response);
-                window["count"] = 2;
+              videoSource.appendBuffer(response);
+              window["processing_video"] = true;
+              window.video.play();
+              window["count"] = 2;
+            }
+            else if (window["processing_video"] == false)
+            {
+              if (((window["video_hash"])[(window["count"])]) != undefined) {
+                videoSource.appendBuffer(window["video_hash"][window["count"]]);
+                window["processing_video"] = true;
+                window["count"] += 1;
+              }
             }
         }
     }, false);
@@ -76,12 +74,15 @@ window.video.src = URL.createObjectURL(mediaSource);
 
 var onMediaSourceOpen = function (e) {
     mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
-    window.videoSource = mediaSource.addSourceBuffer('video/mp4');
+    window.videoSource = mediaSource.addSourceBuffer('video/webm;codecs="vorbis,vp8"');
         videoSource.addEventListener('updateend', function() {
-            if ((window["video_hash"])[(window["count"])] != undefined) {
+          console.log("COUNT = "+window["count"]);
+          console.log("VALUE = "+((window["video_hash"])[(window["count"])]));
+            if (((window["video_hash"])[(window["count"])]) != undefined) {
                 videoSource.appendBuffer(window["video_hash"][window["count"]]);
                 window["count"] += 1;
             }
+          window["processing_video"] = false;
         }, false);
     injectVideoIntoBuffer();
 }
@@ -89,8 +90,7 @@ var onMediaSourceOpen = function (e) {
 mediaSource.addEventListener('sourceopen', onMediaSourceOpen);
 
 var injectVideoIntoBuffer = function onResponse() {
-    var url = window.location.hash.split("#")[1];
-    Length(url, window["CONNECTIONS"]);
+    Length("videos/79.webm", window["CONNECTIONS"]);
 }
 
 function check_timeout(something){
@@ -113,7 +113,3 @@ function sleep(el) {
     window["timer"] = setTimeout(check_timeout(el), 1000); 
 
 }
-</script>
-
-</body>
-</html>

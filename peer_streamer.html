@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<title>P2P twitter</title>
+		<meta name="generator" content="Bootply" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<!--[if lt IE 9]>
+			<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		<link href="css/styles.css" rel="stylesheet">
+	</head>
+	<body>
+<!--main-->
+<div class="container">
+   <div class="row">
+   <div class="col-md-12 col-sm-6">
+        <div class="well"> 
+            <h1>Peer Video Streamer (<span id="client"></span>)</h1>
+        </div>
+	</div>
+  </div>
+  <div class="row">
+  	<div class="col-md-6 col-sm-6 well">
+	  	<video width="500" height="400" id="video" controls>
+			Your browser does not support the video tag.
+		</video>
+	</div>
+	<div class="col-md-5 col-sm-6 well" style="margin-left: 50px;">
+	  	<div>
+	  		<h2 class="center">Log Information</h2>
+	  	</div>
+	  	<hr />
+	  	<div class="row" id="log">
+	  		
+	  	</div>
+	</div>
+  </div>
+  <hr>
+	<!-- script references -->
+	<script src="js/jquery-2.02.js"></script>
+    <script src="js/webrtc.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/scripts.js"></script>
+		<script src="js/client.js"></script>
+    <!-- // <script src="js/automate.js"></script> -->
+    <script src="js/webrtc.js"></script>
+    <script type="text/javascript" src="js/peer_player.js"></script>
+	</body>
+</html>
